@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GearUP KOL Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1f1b16;
+        --muted: #6b6257;
+        --paper: #f7f1e8;
+        --sand: #efe4d6;
+        --accent: #2f6f5e;
+        --accent-2: #d07a2a;
+        --line: #e0d4c3;
+        --chip: #f1e3d2;
+        --good: #1f7a4f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(1200px 600px at 20% -10%, #fff7eb 0%, var(--paper) 45%, #f3eadf 100%);
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 32px auto 80px;
+        padding: 0 20px;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(135deg, #fff6ea 0%, #f2e4d3 100%);
+        border: 1px solid var(--line);
+        padding: 18px 20px;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+      }
+      header h1 {
+        margin: 0;
+        font-size: 22px;
+        letter-spacing: 0.3px;
+      }
+      header p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .panel {
+        background: #fffaf3;
+        border: 1px solid var(--line);
+        padding: 14px;
+        border-radius: 14px;
+      }
+      .panel label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      input[type="text"],
+      input[type="number"],
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: #fff;
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 14px;
+      }
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+      button {
+        border: none;
+        background: var(--accent);
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: var(--accent-2);
+      }
+      button.ghost {
+        background: transparent;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .kol-list {
+        margin-top: 20px;
+        display: grid;
+        gap: 12px;
+      }
+      details {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px 14px;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04);
+      }
+      summary {
+        cursor: pointer;
+        list-style: none;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 12px;
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      .kol-title {
+        display: grid;
+        gap: 2px;
+      }
+      .kol-name {
+        font-weight: 700;
+      }
+      .kol-meta {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .chip {
+        background: var(--chip);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        color: #5c4a35;
+      }
+      .video-list {
+        margin-top: 10px;
+        display: grid;
+        gap: 8px;
+      }
+      .video-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fffdf8;
+      }
+      .stats {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .stat {
+        background: #f7efe4;
+        padding: 4px 8px;
+        border-radius: 8px;
+      }
+      .stat.good {
+        color: var(--good);
+        border: 1px solid #cfe6da;
+        background: #f1f9f4;
+      }
+      .row-actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .footer {
+        margin-top: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <h1>GearUP KOL Tracker</h1>
+          <p>本地小工具，粘贴链接即可抓取 YouTube 播放量/点赞/评论</p>
+        </div>
+        <div class="toolbar">
+          <button class="ghost" id="exportBtn">导出 CSV</button>
+          <button class="secondary" id="importBtn">导入 CSV</button>
+          <input type="file" id="importFile" accept=".csv" hidden />
+        </div>
+      </header>
+
+      <div class="controls">
+        <div class="panel">
+          <label>YouTube API Key</label>
+          <input type="text" id="apiKey" placeholder="粘贴你的 API Key" />
+          <div class="row-actions" style="margin-top:8px">
+            <button class="ghost" id="saveApiKey">保存 Key</button>
+            <div class="hint" id="apiKeyStatus">未保存</div>
+          </div>
+        </div>
+        <div class="panel">
+          <label>新增 KOL</label>
+          <input type="text" id="kolName" placeholder="KOL 名字" />
+          <input type="text" id="kolContact" placeholder="联系方式" style="margin-top:8px" />
+          <input type="number" id="kolPrice" placeholder="报价" style="margin-top:8px" />
+          <button id="addKol" style="margin-top:8px">添加 KOL</button>
+          <div class="hint" style="margin-top:6px">添加后在下方列表展开填写视频</div>
+        </div>
+        <div class="panel">
+          <label>搜索 KOL</label>
+          <input type="text" id="searchName" placeholder="按名字搜索" />
+          <div class="hint" style="margin-top:8px">打开页面自动更新视频数据</div>
+        </div>
+      </div>
+
+      <div class="kol-list" id="kolList"></div>
+      <div class="footer hint">数据保存在浏览器本地，换电脑需导出 CSV</div>
+    </div>
+
+    <script>
+      const storageKey = "gearup_kol_data_v1";
+      const apiKeyInput = document.getElementById("apiKey");
+      const apiKeyStatus = document.getElementById("apiKeyStatus");
+      const saveApiKeyBtn = document.getElementById("saveApiKey");
+      const searchNameInput = document.getElementById("searchName");
+      const kolList = document.getElementById("kolList");
+      const importBtn = document.getElementById("importBtn");
+      const importFile = document.getElementById("importFile");
+      const exportBtn = document.getElementById("exportBtn");
+
+      function loadState() {
+        const raw = localStorage.getItem(storageKey);
+        return raw ? JSON.parse(raw) : { apiKey: "", kols: [] };
+      }
+
+      function saveState(state) {
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      }
+
+      function getYouTubeId(url) {
+        if (!url) return "";
+        const shortMatch = url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
+        if (shortMatch) return shortMatch[1];
+        const shortsMatch = url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/);
+        if (shortsMatch) return shortsMatch[1];
+        const vMatch = url.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+        if (vMatch) return vMatch[1];
+        return "";
+      }
+
+      async function fetchStats(apiKey, videoId) {
+        const url = "https://www.googleapis.com/youtube/v3/videos?" +
+          new URLSearchParams({ part: "statistics,snippet", id: videoId, key: apiKey });
+        const res = await fetch(url);
+        const data = await res.json();
+        const item = data.items && data.items[0];
+        const stats = (item && item.statistics) || {};
+        const snippet = (item && item.snippet) || {};
+        return {
+          viewCount: stats.viewCount || "",
+          likeCount: stats.likeCount || "",
+          commentCount: stats.commentCount || "",
+          publishedAt: snippet.publishedAt || "",
+        };
+      }
+
+      function render() {
+        const state = loadState();
+        apiKeyInput.value = state.apiKey;
+        apiKeyStatus.textContent = state.apiKey ? "已保存" : "未保存";
+        kolList.innerHTML = "";
+        const keyword = (searchNameInput.value || "").trim().toLowerCase();
+        state.kols.forEach((kol, idx) => {
+          if (keyword && !kol.name.toLowerCase().includes(keyword)) return;
+          const details = document.createElement("details");
+          details.open = false;
+          const summary = document.createElement("summary");
+          summary.innerHTML = `
+            <div class="kol-title">
+              <div class="kol-name">${kol.name}</div>
+              <div class="kol-meta">${kol.contact || ""} ${kol.price ? "| $" + kol.price : ""}</div>
+            </div>
+            <div class="chip">${kol.videos.length} 视频</div>
+          `;
+          details.appendChild(summary);
+
+          const addWrap = document.createElement("div");
+          addWrap.className = "panel";
+          addWrap.style.marginTop = "10px";
+          addWrap.innerHTML = `
+            <label>新增视频链接（可一次粘贴多条，换行分隔）</label>
+            <textarea data-add="${idx}" placeholder="https://youtu.be/xxxx\nhttps://www.youtube.com/watch?v=yyyy"></textarea>
+            <div class="row-actions" style="margin-top:8px">
+              <button data-addbtn="${idx}">添加视频</button>
+              <button class="ghost" data-remove="${idx}">删除该 KOL</button>
+            </div>
+          `;
+          details.appendChild(addWrap);
+
+          const list = document.createElement("div");
+          list.className = "video-list";
+          kol.videos.forEach((v, vIdx) => {
+            const publishedLabel = v.publishedAt
+              ? new Date(v.publishedAt).toLocaleString("zh-CN", {
+                  timeZone: "Asia/Shanghai",
+                })
+              : "-";
+            const row = document.createElement("div");
+            row.className = "video-row";
+            row.innerHTML = `
+              <div>
+                <div style="font-size:13px; word-break: break-all">${v.url}</div>
+                <div class="stats">
+                  <div class="stat good">播放 ${v.views || "-"}</div>
+                  <div class="stat">点赞 ${v.likes || "-"}</div>
+                  <div class="stat">评论 ${v.comments || "-"}</div>
+                  <div class="stat">发布时间 ${publishedLabel}</div>
+                  <div class="stat">${v.updatedAt ? "更新: " + v.updatedAt : "未更新"}</div>
+                </div>
+              </div>
+              <div class="row-actions">
+                <button class="ghost" data-delvideo="${idx}|${vIdx}">删除</button>
+              </div>
+            `;
+            list.appendChild(row);
+          });
+          details.appendChild(list);
+
+          kolList.appendChild(details);
+        });
+      }
+
+      function addKol() {
+        const name = document.getElementById("kolName").value.trim();
+        const contact = document.getElementById("kolContact").value.trim();
+        const price = document.getElementById("kolPrice").value.trim();
+        if (!name) return;
+        const state = loadState();
+        state.kols.push({ name, contact, price, videos: [] });
+        saveState(state);
+        document.getElementById("kolName").value = "";
+        document.getElementById("kolContact").value = "";
+        document.getElementById("kolPrice").value = "";
+        render();
+      }
+
+      function addVideos(kolIndex, text) {
+        const urls = text.split(/\r?\n/).map((u) => u.trim()).filter(Boolean);
+        if (!urls.length) return;
+        const state = loadState();
+        const kol = state.kols[kolIndex];
+        urls.forEach((url) => {
+          kol.videos.push({ url, views: "", likes: "", comments: "", updatedAt: "" });
+        });
+        saveState(state);
+        render();
+      }
+
+      let autoRefreshing = false;
+      async function refreshAll() {
+        if (autoRefreshing) return;
+        autoRefreshing = true;
+        const state = loadState();
+        const apiKey = state.apiKey || apiKeyInput.value.trim();
+        if (apiKey && state.apiKey !== apiKey) {
+          state.apiKey = apiKey;
+          saveState(state);
+        }
+        if (!apiKey) {
+          autoRefreshing = false;
+          return;
+        }
+        for (let i = 0; i < state.kols.length; i++) {
+          for (let j = 0; j < state.kols[i].videos.length; j++) {
+            const video = state.kols[i].videos[j];
+            const videoId = getYouTubeId(video.url);
+            if (!videoId) continue;
+            const stats = await fetchStats(apiKey, videoId);
+            const now = new Date().toLocaleString();
+            video.views = stats.viewCount;
+            video.likes = stats.likeCount;
+            video.comments = stats.commentCount;
+            video.publishedAt = stats.publishedAt;
+            video.updatedAt = now;
+          }
+        }
+        saveState(state);
+        render();
+        autoRefreshing = false;
+      }
+
+      function exportCsv() {
+        const state = loadState();
+        const rows = [
+          ["kol_name", "contact", "price", "video_url", "views", "likes", "comments", "updated_at"],
+        ];
+        state.kols.forEach((k) => {
+          k.videos.forEach((v) => {
+            rows.push([k.name, k.contact, k.price, v.url, v.views, v.likes, v.comments, v.updatedAt]);
+          });
+        });
+        const csv = rows.map((r) => r.map((v) => "\"" + String(v || "").replace(/\"/g, "\"\"") + "\"").join(",")).join("\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "gearup_kol_export.csv";
+        a.click();
+      }
+
+      function importCsv(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const text = reader.result || "";
+          const lines = text.split(/\r?\n/).filter(Boolean);
+          if (lines.length < 2) return;
+          const rows = lines.slice(1);
+          const kols = {};
+          rows.forEach((line) => {
+            const cols = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map((c) => c.replace(/^"|"$/g, "").replace(/""/g, "\""));
+            const [name, contact, price, url, views, likes, comments, updatedAt] = cols;
+            if (!name || !url) return;
+            if (!kols[name]) kols[name] = { name, contact, price, videos: [] };
+            kols[name].videos.push({ url, views, likes, comments, updatedAt });
+          });
+          const state = loadState();
+          state.kols = Object.values(kols);
+          saveState(state);
+          render();
+        };
+        reader.readAsText(file, "utf-8");
+      }
+
+      document.getElementById("addKol").addEventListener("click", addKol);
+      apiKeyInput.addEventListener("input", (e) => {
+        const state = loadState();
+        state.apiKey = e.target.value.trim();
+        saveState(state);
+        apiKeyStatus.textContent = state.apiKey ? "已保存" : "未保存";
+      });
+      saveApiKeyBtn.addEventListener("click", () => {
+        const state = loadState();
+        state.apiKey = apiKeyInput.value.trim();
+        saveState(state);
+        apiKeyStatus.textContent = state.apiKey ? "已保存" : "未保存";
+        refreshAll();
+      });
+      searchNameInput.addEventListener("input", render);
+
+      importBtn.addEventListener("click", () => importFile.click());
+      importFile.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) importCsv(file);
+      });
+      exportBtn.addEventListener("click", exportCsv);
+
+      kolList.addEventListener("click", (e) => {
+        const addBtn = e.target.getAttribute("data-addbtn");
+        if (addBtn !== null) {
+          const ta = document.querySelector(`textarea[data-add="${addBtn}"]`);
+          addVideos(Number(addBtn), ta.value);
+          ta.value = "";
+          return;
+        }
+        const del = e.target.getAttribute("data-remove");
+        if (del !== null) {
+          const state = loadState();
+          state.kols.splice(Number(del), 1);
+          saveState(state);
+          render();
+          return;
+        }
+        const delVideo = e.target.getAttribute("data-delvideo");
+        if (delVideo) {
+          const [k, v] = delVideo.split("|").map(Number);
+          const state = loadState();
+          state.kols[k].videos.splice(v, 1);
+          saveState(state);
+          render();
+          return;
+        }
+      });
+
+      render();
+      refreshAll();
+    </script>
+  </body>
+</html>
